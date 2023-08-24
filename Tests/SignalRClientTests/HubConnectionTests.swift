@@ -12,6 +12,9 @@ import XCTest
 class HubConnectionTests: XCTestCase {
 
     func testThatOpeningHubConnectionFailsIfHandshakeFails() {
+        // This test fails most of the times when running against SignalR Service - the webSocket is closed
+        // before receiving any data. Occasionally when data is being received before close the data is correct.
+        // This is a negative test so leaving as is for now.
         let didFailToOpenExpectation = expectation(description: "connection failed to open")
         let didCloseExpectation = expectation(description: "connection closed")
 
@@ -30,6 +33,7 @@ class HubConnectionTests: XCTestCase {
         }
         hubConnectionDelegate.connectionDidCloseHandler = { error in
             didCloseExpectation.fulfill()
+            XCTAssertNil(error)
         }
 
         let hubConnection = HubConnectionBuilder(url: TARGET_TESTHUB_URL)
@@ -495,7 +499,7 @@ class HubConnectionTests: XCTestCase {
 
         hubConnectionDelegate.connectionDidCloseHandler = { error in
             XCTAssertNil(error)
-            XCTAssert(lastItem < 500)
+            XCTAssert(lastItem < 200)
             didCloseExpectation.fulfill()
         }
 
